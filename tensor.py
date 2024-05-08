@@ -9,9 +9,6 @@ class Tensor:
         self.grad = np.zeros_like(self.data)
         self.shape = self.data.shape
         self._backward = lambda: None
-
-    def __repr__(self) -> str:
-        return f'Tensor(data={self.data})'
     
     def __add__(self, other):
         # Elementwise addition. Tensors must be the same size, or one of 
@@ -22,6 +19,17 @@ class Tensor:
         def _backward():
             self.grad += out.grad
             other.grad += out.grad
+        out._backward = _backward
+
+        return out
+    
+    def __sub__(self, other):    
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out = Tensor(self.data - other.data, (self, other))
+
+        def _backward():
+            self.grad += out.grad
+            other.grad -= out.grad
         out._backward = _backward
 
         return out
@@ -76,14 +84,33 @@ class Tensor:
         out = Tensor(np.transpose(self.data), (self,))
         
         def _backward():
-            self.grad += self.grad
+            self.grad += np.transpose(out.grad)
         out._backward = _backward
         
+        return out
+    
+    def log(self):
+        out = Tensor(np.log(self.data), (self,))
+
+        def _backward():
+            self.grad += (1/self.data) * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def exp(self):
+        out = Tensor(np.exp(self.data), (self,))
+        
+        def _backward():
+            self.grad += np.exp(self.data) * out.grad
+        out._backward = _backward
+
         return out
     
     def backward(self):
         # https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py
         # topological order all of the children in the graph
+        
         topo = []
         visited = set()
         def build_topo(v):
@@ -104,12 +131,9 @@ class Tensor:
     
     def __radd__(self, other):
         return self + other
-
-    def __sub__(self, other):    
-        return self + (-other)
     
     def __rsub__(self, other):
-        return other + (-self)
+        return other - self
     
     def __rmul__(self, other):
         return self * other
@@ -119,3 +143,27 @@ class Tensor:
     
     def __rtruediv__(self, other):
         return other * self**-1
+    
+    def __repr__(self):
+        return f'Tensor(data={self.data})'
+    
+    def __len__(self):
+        return len(self.data)
+    
+    def __iter__(self):
+        # Track the current element in the iterable
+        self.current = 0
+        return self
+    
+    def __next__(self):
+        if self.current >= len(self.data):
+            raise StopIteration
+        current = self.data[self.current]
+        self.current += 1
+        return current
+    
+    def __getitem__(self, key):
+        return self.data[key]
+    
+    def __setitem__(self, key, value):
+        self.data[key] = value
