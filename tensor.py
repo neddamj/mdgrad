@@ -119,6 +119,16 @@ class Tensor:
 
         return out
     
+    def tanh(self):
+        val = (np.exp(self.data) - np.exp(-self.data))/(np.exp(self.data) + np.exp(-self.data))
+        out = Tensor(val, (self,))
+
+        def _backward():
+            self.grad += (1 - val**2) * out.grad
+        out._backward = _backward
+
+        return out
+    
     def max(self):
         return np.max(self.data)
     
