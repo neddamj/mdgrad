@@ -107,6 +107,24 @@ class Tensor:
 
         return out
     
+    def sigmoid(self):
+        value = 1/(1 + np.exp(-self.data))
+        out = Tensor(value, (self,))
+        
+        def _backward():
+            exp = np.exp(-self.data)
+            g = exp/((1+exp)**2)
+            self.grad += g * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def max(self):
+        return np.max(self.data)
+    
+    def min(self):
+        return np.min(self.data)
+    
     def backward(self):
         # https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py
         # topological order all of the children in the graph
@@ -125,6 +143,25 @@ class Tensor:
         self.grad = np.ones_like(self.data)
         for v in reversed(topo):
             v._backward() 
+        
+    @classmethod
+    def zeros(cls, shape):
+        assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
+        return cls(np.zeros(shape))
+
+    @classmethod
+    def ones(cls, shape):
+        assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
+        return cls(np.ones(shape))
+    
+    @classmethod
+    def normal(cls, mean=0.0, std=1.0, shape=None):
+        assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
+        return cls(np.random.normal(mean, std, shape))
+    
+    @classmethod
+    def eye(cls, N, M=None):
+        return cls(np.eye(N, M))
 
     def __neg__(self):
         return self * -1
