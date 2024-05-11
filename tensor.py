@@ -8,11 +8,10 @@ class Tensor:
         self._prev = set(_children)
         self.grad = np.zeros_like(self.data)
         self.shape = self.data.shape
+        self.size = self.data.size
         self._backward = lambda: None
     
     def __add__(self, other):
-        # Elementwise addition. Tensors must be the same size, or one of 
-        # them must be a scalar 
         other = other if isinstance(other, Tensor) else Tensor(other)
         out = Tensor(self.data + other.data, (self, other))
 
@@ -35,8 +34,6 @@ class Tensor:
         return out
 
     def __mul__(self, other):
-        # Elementwise multiplication. Tensors must be the same size, or one of 
-        # them must be a scalar 
         other = other if isinstance(other, Tensor) else Tensor(other)
         out = Tensor(self.data * other.data, (self, other))
 
@@ -48,7 +45,6 @@ class Tensor:
         return out
     
     def __pow__(self, other):
-        # The exponent must be a scalar
         assert isinstance(other, (int, float)), "Exponent must be a scalar (int/float)"
         out = Tensor(self.data ** other, (self, other))
 
@@ -59,13 +55,12 @@ class Tensor:
         return out
     
     def __matmul__(self, other):
-        # Rows of self must match columns of other
         other = other if isinstance(other, Tensor) else Tensor(other)
         out = Tensor(self.data @ other.data, (self, other))
 
         def _backward():
             self.grad += out.grad @ np.transpose(other.data)
-            other.grad += np.transpose(out.grad @ self.data)
+            other.grad += np.transpose(self.data) @ out.grad
         out._backward = _backward
 
         return out
@@ -80,7 +75,7 @@ class Tensor:
 
         return out
     
-    def transpose(self):
+    def transpose(self,):
         out = Tensor(np.transpose(self.data), (self,))
         
         def _backward():
@@ -90,7 +85,10 @@ class Tensor:
         return out
     
     def log(self):
-        out = Tensor(np.log(self.data), (self,))
+        print(self.data)
+        val = Tensor(np.log(self.data) + 1e-9, (self,))
+        print(val)
+        out = val
 
         def _backward():
             self.grad += (1/self.data) * out.grad
@@ -129,11 +127,30 @@ class Tensor:
 
         return out
     
-    def max(self):
-        return np.max(self.data)
+    def softmax(self, dim=1):
+        exps = np.exp(self.data - np.max(self.data, axis=dim, keepdims=True))
+        probs = exps / np.sum(exps, axis=dim, keepdims=True)
+        out = Tensor(probs, (self,))
+
+        def _backward():
+            for i, (output, grad) in enumerate(zip(out.data, out.grad)):
+                output = output.reshape(-1, 1)
+                jacobian = np.diagflat(output) - output @ np.transpose(output)
+                g = np.transpose(jacobian @ np.transpose(grad))
+                self.grad[i] += g
+        out._backward = _backward
+
+        return out
     
-    def min(self):
-        return np.min(self.data)
+    def reshape(self, *new_shape):
+        old_shape = self.shape
+        out = Tensor(self.data.reshape(*new_shape), (self,))
+
+        def _backward():
+            self.grad += out.grad.reshape(old_shape)
+        out._backward = _backward
+
+        return out
     
     def backward(self):
         # https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py
@@ -153,6 +170,15 @@ class Tensor:
         self.grad = np.ones_like(self.data)
         for v in reversed(topo):
             v._backward() 
+    
+    def max(self):
+        return np.max(self.data)
+    
+    def min(self):
+        return np.min(self.data)
+    
+    def numpy(self):
+        return np.array(self.data)
         
     @classmethod
     def zeros(cls, shape):
