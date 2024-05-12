@@ -3,12 +3,14 @@ import numpy as np
 class Tensor:
     def __init__(self, data, _children=()):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
-        # Set data to floats to division can be done
-        self.data = self.data.astype(float) 
-        self._prev = set(_children)
         self.grad = np.zeros_like(self.data)
+        # Set data to floats to division can be done
+        self.data = self.data.astype(np.float32) 
+        self.grad = self.grad.astype(np.float32)
+        self._prev = set(_children)
         self.shape = self.data.shape
         self.size = self.data.size
+        self.dtype = self.data.dtype
         self._backward = lambda: None
     
     def __add__(self, other):
@@ -152,6 +154,15 @@ class Tensor:
 
         return out
     
+    def sum(self):
+        out = Tensor(self.data.sum(), (self,))
+
+        def _backward():
+            self.grad += np.ones_like(self.data) * out.grad
+        out._backward = _backward
+
+        return out
+        
     def backward(self):
         # https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py
         # topological order all of the children in the graph
@@ -218,7 +229,7 @@ class Tensor:
         return other * self**-1
     
     def __repr__(self):
-        return f'Tensor(data={self.data})'
+        return f'Tensor(data={self.data}, dtype={self.data.dtype})'
     
     def __len__(self):
         return len(self.data)
