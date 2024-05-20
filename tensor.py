@@ -1,5 +1,7 @@
 import numpy as np
 
+import numpy as np
+
 class Tensor:
     def __init__(self, data, _children=()):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
@@ -48,7 +50,7 @@ class Tensor:
     
     def __pow__(self, other):
         assert isinstance(other, (int, float)), "Exponent must be a scalar (int/float)"
-        out = Tensor(self.data ** other, (self, other))
+        out = Tensor(self.data ** other, (self,))
 
         def _backward():
             self.grad += (other * self.data ** (other -1)) * out.grad
@@ -205,6 +207,10 @@ class Tensor:
     def normal(cls, mean=0.0, std=1.0, shape=None):
         assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
         return cls(np.random.normal(mean, std, shape))
+    
+    @classmethod
+    def randn(cls, *args):
+        return cls(np.random.randn(*args))
     
     @classmethod
     def eye(cls, N, M=None):
