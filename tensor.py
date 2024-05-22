@@ -1,5 +1,7 @@
 import numpy as np
 
+import numpy as np
+
 class Tensor:
     def __init__(self, data, _children=()):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
@@ -36,6 +38,8 @@ class Tensor:
         return out
 
     def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            other = np.ones_like(self.data) * other
         other = other if isinstance(other, Tensor) else Tensor(other)
         out = Tensor(self.data * other.data, (self, other))
 
@@ -154,13 +158,22 @@ class Tensor:
 
         return out
     
-    def sum(self):
-        out = Tensor(self.data.sum(), (self,))
+    def sum(self, axis=None, keepdims=True):
+        out = Tensor(np.sum(self.data, axis=axis, keepdims=keepdims), (self,))
 
         def _backward():
             self.grad += np.ones_like(self.data) * out.grad
         out._backward = _backward
 
+        return out
+    
+    def mean(self):
+        out = Tensor(self.data.mean(), (self,))
+
+        def _backward():
+            pass
+        out._backward = _backward
+        
         return out
         
     def backward(self):
