@@ -1,7 +1,5 @@
 import numpy as np
 
-import numpy as np
-
 class Tensor:
     def __init__(self, data, _children=()):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
