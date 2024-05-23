@@ -6,11 +6,52 @@ Hopefully useful as an educational resource.
 
 # Example Usage
 
+A silly example showing supported operations
+```python
+import madnet as mn
+import madnet.nn as nn
+
+a = mn.Tensor([[-2.0, 4.0, 5.0], 
+           [1.0, -5.5, 2.4]])
+b = mn.Tensor([[-2.0, 4.0], 
+           [1.0, 2.4],
+           [1.4, 9.0]])
+c = a @ b
+d = c * 3 / 2
+e = d ** 2
+f = e.sum()
+print(f.data) # prints 5776.783
+f.backward()
+print(a.grad) # prints (2, 3) array which is the numerical value of df/da
 ```
-x1 = Tensor([[8.0, 2.0]])
-w1 = Tensor([[3.2, 1.2]])
-z1 = w1 * x1 + x1
-q1 = z1.relu()
-y1 = q1 @ x1.transpose()
-y1.backward()
+
+
+An example showing how to define and run a neural network. See demo.ipynb for more details on training.
+```python
+import madnet as mn
+import madnet.nn as nn
+
+# Define the model and loss function
+model = nn.Sequential([
+    nn.Linear(2, 20),
+    nn.ReLU(),
+    nn.Linear(20, 50), 
+    nn.ReLU(),
+    nn.Linear(50, 15),
+    nn.ReLU(),
+    nn.Linear(15, 1),
+    nn.Sigmoid()
+])
+loss_fn = nn.MSELoss()
+
+# Create dummy data
+X = mn.Tensor.randn(100, 2)
+target = mn.Tensor.randn(100, 1)
+
+# Compute output and loss
+out = model(X)
+loss = loss_fn(out, target)
+
+# Compute gradients of parameters
+loss.backward()
 ```
