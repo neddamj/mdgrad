@@ -4,6 +4,11 @@ A small autograd engine that implements backpropagation (reverse-mode autodiff).
 
 Hopefully useful as an educational resource.
 
+# Installation
+```
+pip install madnet
+```
+
 # Example Usage
 
 A silly example showing supported operations
