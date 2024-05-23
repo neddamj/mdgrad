@@ -4,15 +4,18 @@ A small autograd engine that implements backpropagation (reverse-mode autodiff).
 
 Hopefully useful as an educational resource.
 
-# Installation
-```
+## Installation
+
+``` bash
 pip install madnet
 ```
 
-# Example Usage
+## Example Usage
 
 A silly example showing supported operations
+
 ```python
+
 import madnet as mn
 import madnet.nn as nn
 
@@ -30,9 +33,10 @@ f.backward()
 print(a.grad) # prints (2, 3) array which is the numerical value of df/da
 ```
 
-
 An example showing how to define and run a neural network. See demo.ipynb for more details on training.
+
 ```python
+
 import madnet as mn
 import madnet.nn as nn
 
