@@ -1,7 +1,5 @@
 import numpy as np
 
-import numpy as np
-
 class Tensor:
     def __init__(self, data, _children=()):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
@@ -103,28 +101,41 @@ class Tensor:
         return out
     
     def exp(self):
-        out = Tensor(np.exp(self.data), (self,))
+        exp = np.exp(self.data)
+        out = Tensor(exp, (self,))
         
         def _backward():
-            self.grad += np.exp(self.data) * out.grad
+            self.grad += exp * out.grad
         out._backward = _backward
 
         return out
     
     def sigmoid(self):
-        value = 1/(1 + np.exp(-self.data))
+        def _positive(x):
+            return 1 / (1 + np.exp(-x))
+        def _negative(x):
+            exp = np.exp(x)
+            return exp / (exp + 1)
+        # Numerically stable sigmoid
+        positive = self.data >= 0
+        negative = ~positive
+        value = np.empty_like(self.data)
+        value[positive] = _positive(self.data[positive])
+        value[negative] = _negative(self.data[negative])
         out = Tensor(value, (self,))
         
         def _backward():
-            exp = np.exp(-self.data)
-            g = exp/((1+exp)**2)
+            #exp = np.exp(-self.data)
+            g = value * (1 - value)
             self.grad += g * out.grad
         out._backward = _backward
 
         return out
     
-    def tanh(self):
-        val = (np.exp(self.data) - np.exp(-self.data))/(np.exp(self.data) + np.exp(-self.data))
+    def tanh(self, dim=1):
+        exp = np.exp(self.data)
+        neg_exp = np.exp(-self.data)
+        val = (exp - neg_exp)/(exp + neg_exp)
         out = Tensor(val, (self,))
 
         def _backward():
