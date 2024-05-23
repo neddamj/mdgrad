@@ -1,6 +1,9 @@
 from tensor import Tensor
 import numpy as np
 
+#######################################
+############# Layers ##################
+#######################################
 class Module:
     def __init__(self):
         pass
@@ -66,3 +69,18 @@ class Sequential(Module):
     def parameters(self):
         return self.params
  
+#######################################
+######### Loss Functions ##############
+#######################################
+class MSELoss(Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x, y):
+        assert x.shape == y.shape, 'input and target tensors must be the same shape'
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        y = y if isinstance(y, Tensor) else Tensor(y)
+        
+        out = ((x - y) ** 2).sum() /  x.size
+
+        return out
