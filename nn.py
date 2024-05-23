@@ -8,8 +8,8 @@ class Module:
     def __init__(self):
         pass
 
-    def __call__(self, x):
-        out = self.forward(x)
+    def __call__(self, *x):
+        out = self.forward(*x)
         return out
 
     def zero_grad(self):
@@ -28,7 +28,7 @@ class Linear(Module):
         self.w = Tensor.randn(in_features, out_features)
         self.b = Tensor.zeros((1, out_features)) if self.bias else None
 
-    def __call__(self, x):
+    def forward(self, x):
         x = x if isinstance(x, Tensor) else Tensor(x)
         
         out = x @ self.w + self.b if self.bias else x @ self.w
@@ -76,7 +76,7 @@ class MSELoss(Module):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, x, y):
+    def forward(self, x, y):
         assert x.shape == y.shape, 'input and target tensors must be the same shape'
         x = x if isinstance(x, Tensor) else Tensor(x)
         y = y if isinstance(y, Tensor) else Tensor(y)
@@ -92,7 +92,7 @@ class ReLU(Module):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, x):
+    def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.relu()
     
@@ -100,7 +100,7 @@ class Sigmoid(Module):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, x):
+    def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.sigmoid()
 
@@ -108,6 +108,6 @@ class SoftMax(Module):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, x):
+    def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.softmax()
