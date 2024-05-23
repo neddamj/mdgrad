@@ -1,6 +1,8 @@
-# madgrad
+# madnet
 
-A small autograd engine that implements backpropagation (reverse-mode autodiff). Heavily inspired by karpathy's [micrograd](https://github.com/karpathy/micrograd/tree/master), and extended to support operations on tensors instead of scalars. Under active development. Hopefully useful as an educational resource.
+A small autograd engine that implements backpropagation (reverse-mode autodiff). Heavily inspired by karpathy's [micrograd](https://github.com/karpathy/micrograd/tree/master), and extended to support operations on tensors instead of scalars. Includes a small neural network api for building and training sequential neural network models.
+
+Hopefully useful as an educational resource.
 
 # Example Usage
 
