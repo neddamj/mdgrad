@@ -5,11 +5,18 @@ class Module:
     def __init__(self):
         pass
 
+    def __call__(self, x):
+        out = self.forward(x)
+        return out
+
     def zero_grad(self):
         for p in self.parameters():
             p.grad = np.zeros_like(p.data)
+    
+    def forward(self, x):
+        pass
 
-    def params(self):
+    def parameters(self):
         return []
     
 class Linear(Module):
@@ -41,3 +48,21 @@ class Linear(Module):
             return [self.w, self.b]
         else:
             return [self.w]
+
+class Sequential(Module):
+    def __init__(self, layers=[]):
+        super().__init__()
+        assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
+        self.layers = layers
+        self.params = []
+        for layer in self.layers:
+            self.params.extend(layer.parameters())
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+    
+    def parameters(self):
+        return self.params
+ 
