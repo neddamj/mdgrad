@@ -2,3 +2,6 @@ TODO.md
 test_nn.ipynb
 test_tensor.ipynb
 __pycache__
+build
+dist
+madnet.egg-info
