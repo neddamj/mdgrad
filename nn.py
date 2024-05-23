@@ -84,3 +84,30 @@ class MSELoss(Module):
         out = ((x - y) ** 2).sum() /  x.size
 
         return out
+    
+#######################################
+###### Activation Functions ###########
+#######################################
+class ReLU(Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x):
+        assert isinstance(x, Tensor), 'input must be a Tensor'
+        return x.relu()
+    
+class Sigmoid(Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x):
+        assert isinstance(x, Tensor), 'input must be a Tensor'
+        return x.sigmoid()
+
+class SoftMax(Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x):
+        assert isinstance(x, Tensor), 'input must be a Tensor'
+        return x.softmax()
