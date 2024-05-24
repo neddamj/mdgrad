@@ -1,0 +1,16 @@
+from madnet.tensor import Tensor
+from .layers import Module
+import numpy as np
+
+class MSELoss(Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x, y):
+        assert x.shape == y.shape, 'input and target tensors must be the same shape'
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        y = y if isinstance(y, Tensor) else Tensor(y)
+        
+        out = ((x - y) ** 2).sum() /  x.size
+
+        return out

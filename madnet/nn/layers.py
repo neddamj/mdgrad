@@ -1,9 +1,6 @@
 from madnet.tensor import Tensor
 import numpy as np
 
-#######################################
-############# Layers ##################
-#######################################
 class Module:
     def __init__(self):
         pass
@@ -68,47 +65,3 @@ class Sequential(Module):
     
     def parameters(self):
         return self.params
- 
-#######################################
-######### Loss Functions ##############
-#######################################
-class MSELoss(Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x, y):
-        assert x.shape == y.shape, 'input and target tensors must be the same shape'
-        x = x if isinstance(x, Tensor) else Tensor(x)
-        y = y if isinstance(y, Tensor) else Tensor(y)
-        
-        out = ((x - y) ** 2).sum() /  x.size
-
-        return out
-
-    
-#######################################
-###### Activation Functions ###########
-#######################################
-class ReLU(Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        assert isinstance(x, Tensor), 'input must be a Tensor'
-        return x.relu()
-    
-class Sigmoid(Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        assert isinstance(x, Tensor), 'input must be a Tensor'
-        return x.sigmoid()
-
-class SoftMax(Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        assert isinstance(x, Tensor), 'input must be a Tensor'
-        return x.softmax()
