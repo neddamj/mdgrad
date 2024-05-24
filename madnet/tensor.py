@@ -178,20 +178,29 @@ class Tensor:
 
         return out
     
-    def mean(self):
-        out = Tensor(self.data.mean(), (self,))
-
-        def _backward():
-            pass
-        out._backward = _backward
-        
-        return out
-    
     def abs(self):
         out = Tensor(np.abs(self.data), (self,))
 
         def _backward():
             self.grad += np.ones_like(self.data) * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def sin(self):
+        out = Tensor(np.sin(self.data), (self,))
+
+        def _backward():
+            self.grad += np.cos(self.data) * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def cos(self):
+        out = Tensor(np.cos(self.data), (self,))
+
+        def _backward():
+            self.grad += -np.sin(self.data) * out.grad
         out._backward = _backward
 
         return out
@@ -222,7 +231,7 @@ class Tensor:
         return np.min(self.data)
     
     def numpy(self):
-        return np.array(self.data)
+        return self.data.copy()
         
     @classmethod
     def zeros(cls, shape):
