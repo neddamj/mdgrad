@@ -13,9 +13,6 @@ class SGD(Module):
 
     def parameters(self):
         return self.params
-        
-    def zero_grad(self):
-        return super().zero_grad()
     
     def step(self):
         for param in self.parameters():
