@@ -2,9 +2,6 @@ from madnet.tensor import Tensor
 import numpy as np
 
 class Module:
-    def __init__(self):
-        pass
-
     def __call__(self, *x):
         out = self.forward(*x)
         return out
@@ -17,7 +14,13 @@ class Module:
         raise NotImplementedError
 
     def parameters(self):
-        return []
+        params = []
+        for key, value in self.__dict__.items():
+            if isinstance(value, Tensor):
+                params.append(value)
+            if isinstance(value, Module):
+                params.extend(value.parameters())
+        return list(set(params))
     
 class Linear(Module):
     def __init__(self, in_features, out_features, bias=True):
@@ -54,9 +57,6 @@ class Sequential(Module):
         super().__init__()
         assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
         self.layers = layers
-        self.params = []
-        for layer in self.layers:
-            self.params.extend(layer.parameters())
 
     def forward(self, x):
         for layer in self.layers:
@@ -64,4 +64,7 @@ class Sequential(Module):
         return x
     
     def parameters(self):
-        return self.params
+        params = []
+        for layer in self.layers:
+            params.extend(layer.parameters())
+        return params

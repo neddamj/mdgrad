@@ -3,25 +3,25 @@ from .layers import Module
 import numpy as np
 
 class ReLU(Module):
-    def __init__(self):
-        super().__init__()
-
     def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.relu()
     
+    def parameters(self):
+        return []
+    
 class Sigmoid(Module):
-    def __init__(self):
-        super().__init__()
-
     def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.sigmoid()
+    
+    def parameters(self):
+        return []
 
 class SoftMax(Module):
-    def __init__(self):
-        super().__init__()
-
     def forward(self, x):
         assert isinstance(x, Tensor), 'input must be a Tensor'
         return x.softmax()
+    
+    def parameters(self):
+        return []
