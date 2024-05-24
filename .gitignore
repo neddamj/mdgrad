@@ -5,3 +5,4 @@ __pycache__
 build
 dist
 madnet.egg-info
+.DS_Store
