@@ -186,6 +186,15 @@ class Tensor:
         out._backward = _backward
         
         return out
+    
+    def abs(self):
+        out = Tensor(np.abs(self.data), (self,))
+
+        def _backward():
+            self.grad += np.ones_like(self.data) * out.grad
+        out._backward = _backward
+
+        return out
         
     def backward(self):
         # https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py
