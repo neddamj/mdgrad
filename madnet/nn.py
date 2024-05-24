@@ -17,7 +17,7 @@ class Module:
             p.grad = np.zeros_like(p.data)
     
     def forward(self, x):
-        pass
+        raise NotImplementedError
 
     def parameters(self):
         return []
@@ -84,6 +84,7 @@ class MSELoss(Module):
         out = ((x - y) ** 2).sum() /  x.size
 
         return out
+
     
 #######################################
 ###### Activation Functions ###########
