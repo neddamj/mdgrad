@@ -5,10 +5,6 @@ class Module:
     def __call__(self, *x):
         out = self.forward(*x)
         return out
-
-    def zero_grad(self):
-        for p in self.parameters():
-            p.grad = np.zeros_like(p.data)
     
     def forward(self, x):
         raise NotImplementedError
