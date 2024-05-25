@@ -319,6 +319,7 @@ def max(x, axis=None):
     return x.max(axis=axis)
 
 def min(x, axis=None):
+    x = x if isinstance(x, Tensor) else Tensor(x)
     return x.min(axis=axis)
 
 def argmax(x, axis=None):
