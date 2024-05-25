@@ -224,11 +224,11 @@ class Tensor:
         for v in reversed(topo):
             v._backward() 
     
-    def max(self):
-        return np.max(self.data)
+    def max(self, axis=None):
+        return np.max(self.data, axis=axis)
     
-    def min(self):
-        return np.min(self.data)
+    def min(self, axis=None):
+        return np.min(self.data, axis=axis)
     
     def numpy(self):
         return self.data.copy()
@@ -297,3 +297,49 @@ class Tensor:
     
     def __setitem__(self, key, value):
         self.data[key] = value
+
+def sum(x, axis=None, keepdims=True):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.sum(axis=axis, keepdims=keepdims)
+
+def exp(x):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.exp()
+
+def sin(x):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.sin()
+
+def cos(x):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.cos()
+
+def max(x, axis=None):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.max(axis=axis)
+
+def mine(x, axis=None):
+    return x.min(axis=axis)
+
+def argmax(x, axis=None):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return Tensor(np.argmax(x.data, axis=axis))
+
+def argmin(x, axis=None):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return Tensor(np.argmin(x.data, axis=axis))
+
+def ones(shape):
+    return Tensor.ones(shape=shape)
+
+def zeros(shape):
+    return Tensor.zeros(shape=shape)
+
+def eye(N, M=None):
+    return Tensor.eye(N=N, M=M)
+
+def randn(*shape):
+    return Tensor.randn(*shape)
+
+def tensor(data):
+    return Tensor(data)
