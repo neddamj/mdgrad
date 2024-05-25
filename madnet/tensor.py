@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class Tensor:
     def __init__(self, data, _children=()):
@@ -301,6 +302,11 @@ class Tensor:
 def sum(x, axis=None, keepdims=True):
     x = x if isinstance(x, Tensor) else Tensor(x)
     return x.sum(axis=axis, keepdims=keepdims)
+
+def mean(x, axis=None, keepdims=False):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    out = x.sum(axis=axis, keepdims=keepdims) 
+    return out * math.prod(out.shape) / math.prod(x.shape)
 
 def exp(x):
     x = x if isinstance(x, Tensor) else Tensor(x)
