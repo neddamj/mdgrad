@@ -1,18 +1,78 @@
 from setuptools import setup, find_packages
 import os
 
-VERSION = '0.0.1'
+VERSION = '0.1'
 DESCRIPTION = 'Tensor-based autdiff engine and neural network API'
-LONG_DESCRIPTION = '''
-                        A package that allows one to perform tensor operations and 
-                        obtain the derivatives of these tensors via reverse-mode 
-                        automatic differentiation. A small neural network API is 
-                        included via which one can build and train neural networks.
-                    '''
+LONG_DESCRIPTION = """
+# mdnet
+
+A small autograd engine that implements backpropagation (reverse-mode autodiff). Heavily inspired by karpathy's [micrograd](https://github.com/karpathy/micrograd/tree/master), and extended to support operations on tensors instead of scalars. Includes a small neural network api for building and training neural networks.
+
+Hopefully useful as an educational resource.
+
+## Installation
+
+``` bash
+pip install mdnet
+```
+
+## Example Usage
+
+A silly example showing supported operations
+
+```python
+
+import mdnet
+import mdnet.nn as nn
+
+a = 3 * mdnet.randn(3, 2)
+b = mdnet.ones(shape=(2, 2))
+c = a @ b
+d = c * 3 / 2
+e = d ** 2
+f = e.sum()
+print(f.data) 
+f.backward()
+print(a.grad) 
+```
+
+An example showing how to define and run a neural network. See demo.ipynb for more details on training.
+
+```python
+
+import mdnet
+import mdnet.nn as nn
+
+# Define the model and loss function
+model = nn.Sequential([
+    nn.Linear(2, 20),
+    nn.ReLU(),
+    nn.Linear(20, 50), 
+    nn.ReLU(),
+    nn.Linear(50, 15),
+    nn.ReLU(),
+    nn.Linear(15, 1),
+    nn.Sigmoid()
+])
+loss_fn = nn.MSELoss()
+
+# Create dummy data
+X = mdnet.randn(100, 2)
+target = mdnet.randn(100, 1)
+
+# Compute output and loss
+out = model(X)
+loss = loss_fn(out, target)
+
+# Compute gradients of parameters
+loss.backward()
+```
+
+                 """
 
 # Setting up
 setup(
-    name="madnet",
+    name="mdnet",
     version=VERSION,
     author="Jordan Madden",
     author_email="<jordanmadden285@gmail.com>",
@@ -29,5 +89,6 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
-    ]
+    ],
+    python_requires='>=3.9'
 )
