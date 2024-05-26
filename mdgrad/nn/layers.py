@@ -21,7 +21,7 @@ class Module:
 class Linear(Module):
     def __init__(self, in_features, out_features, bias=True):
         self.bias = bias
-        self.w = Tensor.randn(in_features, out_features)
+        self.w = Tensor.randn(in_features, out_features) / np.sqrt(in_features + out_features)
         self.b = Tensor.zeros((1, out_features)) if self.bias else None
 
     def forward(self, x):
