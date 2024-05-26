@@ -1,4 +1,4 @@
-from madnet.tensor import Tensor
+from mdgrad.tensor import Tensor
 from .layers import Module
 import numpy as np
 
