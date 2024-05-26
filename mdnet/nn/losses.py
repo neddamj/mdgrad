@@ -14,3 +14,14 @@ class MSELoss(Module):
     
     def parameters(self):
         return []
+    
+class CrossEntropyLoss(Module):
+    def forward(self, x, y):
+        assert x.shape == y.shape, 'input and target tensors must be the same shape'
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        y = y if isinstance(y, Tensor) else Tensor(y)
+        probs = x.softmax()
+        
+
+    def backward(self):
+        pass

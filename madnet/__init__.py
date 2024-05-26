@@ -1,1 +1,0 @@
-from madnet.tensor import *
