@@ -1,5 +1,3 @@
-from mdgrad.tensor import Tensor
-from .layers import Module
 import numpy as np
 
 class Optimizer:
