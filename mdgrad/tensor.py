@@ -80,18 +80,18 @@ class Tensor:
 
         return out
     
-    def transpose(self,):
-        out = Tensor(np.transpose(self.data), (self,))
+    def transpose(self, axes=None):
+        out = Tensor(np.transpose(self.data, axes=axes), (self,))
         
         def _backward():
-            self.grad += np.transpose(out.grad)
+            self.grad += np.transpose(out.grad, axes=axes)
         out._backward = _backward
         
         return out
     
     def log(self):
-        out = Tensor(np.log(self.data) + 1e-9, (self,))
-        
+        out = Tensor(np.log(self.data + 1e-9), (self,))
+
         def _backward():
             self.grad += (1/self.data) * out.grad
         out._backward = _backward
@@ -336,6 +336,10 @@ def argmax(x, axis=None):
 def argmin(x, axis=None):
     x = x if isinstance(x, Tensor) else Tensor(x)
     return Tensor(np.argmin(x.data, axis=axis))
+
+def transpose(x, axes=None):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.transpose(axes=axes)
 
 def ones(shape):
     return Tensor.ones(shape=shape)
