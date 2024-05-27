@@ -90,11 +90,8 @@ class Tensor:
         return out
     
     def log(self):
-        print(self.data)
-        val = Tensor(np.log(self.data) + 1e-9, (self,))
-        print(val)
-        out = val
-
+        out = Tensor(np.log(self.data) + 1e-9, (self,))
+        
         def _backward():
             self.grad += (1/self.data) * out.grad
         out._backward = _backward
@@ -311,6 +308,10 @@ def mean(x, axis=None, keepdims=False):
 def exp(x):
     x = x if isinstance(x, Tensor) else Tensor(x)
     return x.exp()
+
+def log(x):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.log()
 
 def sin(x):
     x = x if isinstance(x, Tensor) else Tensor(x)
