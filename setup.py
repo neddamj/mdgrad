@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-VERSION = '0.1'
+VERSION = '0.2'
 DESCRIPTION = 'Tensor-based autdiff engine and neural network API'
 LONG_DESCRIPTION = """
 # mdgrad
@@ -36,7 +36,7 @@ f.backward()
 print(a.grad) 
 ```
 
-An example showing how to define and run a neural network. See demo.ipynb for more details on training.
+An example showing how to define and run a neural network. See demo.ipynb and/or regression_demo.ipynb for more details on training.
 
 ```python
 
