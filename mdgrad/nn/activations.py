@@ -17,6 +17,14 @@ class Sigmoid(Module):
     
     def parameters(self):
         return []
+    
+class Tanh(Module):
+    def forward(self, x):
+        assert isinstance(x, Tensor), 'input must be a Tensor'
+        return x.tanh()
+    
+    def parameters(self):
+        return []
 
 class SoftMax(Module):
     def forward(self, x):
