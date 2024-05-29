@@ -35,6 +35,8 @@ class CrossEntropyLoss(Module):
 
         def _backward():
             nonlocal y
+            if type(y) != np.ndarray:
+                y =y.numpy()
             if len(y.shape) == 2:
                 # Turn labels to discrete values if they are
                 # one-hot encoded
