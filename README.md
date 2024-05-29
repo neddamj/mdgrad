@@ -1,6 +1,6 @@
 # mdgrad
 
-A small autograd engine that implements backpropagation (reverse-mode autodiff). Heavily inspired by karpathy's [micrograd](https://github.com/karpathy/micrograd/tree/master), and extended to support operations on tensors instead of scalars. Includes a small neural network api for building and training neural networks.
+A small autograd engine that implements backpropagation (reverse-mode autodiff). Heavily inspired by karpathy's [micrograd](https://github.com/karpathy/micrograd/tree/master), and extended to support operations on tensors instead of scalars. Includes a small neural network api for building and training neural networks. Has a PyTorch-like API.
 
 Hopefully useful as an educational resource.
 
@@ -12,7 +12,7 @@ pip install mdgrad
 
 ## Example Usage
 
-A silly example showing supported operations
+A dumb example showing supported operations
 
 ```python
 
