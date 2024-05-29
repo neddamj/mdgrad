@@ -131,9 +131,7 @@ class Tensor:
         return out
     
     def tanh(self, dim=1):
-        exp = np.exp(self.data)
-        neg_exp = np.exp(-self.data)
-        val = (exp - neg_exp)/(exp + neg_exp)
+        val = np.tanh(self.data)
         out = Tensor(val, (self,))
 
         def _backward():
