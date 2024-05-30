@@ -30,7 +30,7 @@ f.backward()
 print(a.grad) 
 ```
 
-An example showing how to define and run a neural network. See demo.ipynb for more details on training.
+An example showing how to define and run a neural network. See the files in `examples/` for more details on building and training models.
 
 ```python
 
