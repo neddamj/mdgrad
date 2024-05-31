@@ -2,8 +2,8 @@ from mdgrad.tensor import Tensor
 import numpy as np
 
 class Module:
-    def __call__(self, *x):
-        out = self.forward(*x)
+    def __call__(self, *args, **kwargs):
+        out = self.forward(*args, **kwargs)
         return out
     
     def forward(self, x):
