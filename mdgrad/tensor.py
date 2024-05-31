@@ -165,7 +165,7 @@ class Tensor:
 
         return out
     
-    def sum(self, axis=None, keepdims=True):
+    def sum(self, axis=None, keepdims=np._NoValue):
         out = Tensor(np.sum(self.data, axis=axis, keepdims=keepdims), (self,))
 
         def _backward():
