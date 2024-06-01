@@ -1,4 +1,4 @@
-from mdgrad.tensor import Tensor, mean
+from mdgrad.tensor import Tensor, mean, max
 import numpy as np
 
 class Module:
@@ -127,6 +127,9 @@ class Conv2D(Module):
 
         return out
     
+    def parameters(self):
+        return [self.w, self.b]
+    
 class AvgPool2D(Module):
     def __init__(self, kernel_size, stride=None):
         super().__init__()
@@ -172,3 +175,6 @@ class AvgPool2D(Module):
         out._backward = _backward
 
         return out
+    
+    def parameters(self):
+        return []
