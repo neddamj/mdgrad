@@ -100,4 +100,30 @@ class Conv2D(Module):
                         w_end = w_start + self.kernel_size
                         out[i, c, h, w] = (x[i, :, h_start:h_end, w_start:w_end] * self.w[c, ...]).sum().data + self.b[c]
 
+        # Add previous tensors to computation graph
+        out._prev = set((x,))  
+                     
+        def _backward():
+            nonlocal x
+            m, C, H, W = out.shape
+            for i in range(m):
+                for c in range(C):
+                    for h in range(H):
+                        # Slide the filter vertically
+                        h_start = h * self.stride
+                        h_end = h_start + self.kernel_size
+                        for w in range(W):
+                            # Slide the filter horizontally
+                            w_start = w * self.stride
+                            w_end = w_start + self.kernel_size
+                            # Gradients of weights
+                            self.w.grad[c, ...] += out.grad[i, c, h, w] * x[i, :, h_start:h_end, w_start:w_end]
+                            # Gradients of inputs
+                            x.grad[i, :, h_start:h_end, w_start:w_end] += out.grad[i, c, h, w] * self.w[c, ...]
+            
+            for c in range(self.out_channels):
+                # Gradients of biases
+                self.b.grad[c, ...] = out.grad[:, c, ...].sum()
+        out._backward = _backward
+
         return out
