@@ -1,4 +1,4 @@
-from mdgrad.tensor import Tensor
+from mdgrad.tensor import Tensor, mean
 import numpy as np
 
 class Module:
@@ -17,6 +17,23 @@ class Module:
             if isinstance(value, Module):
                 params.extend(value.parameters())
         return list(set(params))
+    
+class Sequential(Module):
+    def __init__(self, layers=[]):
+        super().__init__()
+        assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
+        self.layers = layers
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+    
+    def parameters(self):
+        params = []
+        for layer in self.layers:
+            params.extend(layer.parameters())
+        return params
     
 class Linear(Module):
     def __init__(self, in_features, out_features, bias=True):
@@ -47,23 +64,6 @@ class Linear(Module):
             return [self.w, self.b]
         else:
             return [self.w]
-
-class Sequential(Module):
-    def __init__(self, layers=[]):
-        super().__init__()
-        assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
-        self.layers = layers
-
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        return x
-    
-    def parameters(self):
-        params = []
-        for layer in self.layers:
-            params.extend(layer.parameters())
-        return params
 
 class Conv2D(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
@@ -99,7 +99,6 @@ class Conv2D(Module):
                         w_start = w * self.stride
                         w_end = w_start + self.kernel_size
                         out[i, c, h, w] = (x[i, :, h_start:h_end, w_start:w_end] * self.w[c, ...]).sum().data + self.b[c]
-
         # Add previous tensors to computation graph
         out._prev = set((x,))  
                      
@@ -124,6 +123,52 @@ class Conv2D(Module):
             for c in range(self.out_channels):
                 # Gradients of biases
                 self.b.grad[c, ...] = out.grad[:, c, ...].sum()
+        out._backward = _backward
+
+        return out
+    
+class AvgPool2D(Module):
+    def __init__(self, kernel_size, stride=None):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+
+    def forward(self, x):
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        m, n_C, n_H, n_W = x.shape
+
+        C = n_C
+        H = int((n_H - self.kernel_size) / self.stride) + 1
+        W = int((n_W - self.kernel_size) / self.stride) + 1
+        out = Tensor.zeros((m, C, H, W))
+        for i in range(m):
+            for c in range(C):
+                for h in range(H):
+                    h_start = h * self.stride
+                    h_end = h_start + self.kernel_size
+                    for w in range(W):
+                        w_start = w * self.stride
+                        w_end = w_start + self.kernel_size
+                        out[i, c, h, w] = mean(x[i, c, h_start:h_end, w_start:w_end]).data
+        # Add previous tensor to computation graph
+        out._prev = set((x,))
+
+        def _backward():
+            nonlocal x
+            m, C, H, W = out.shape
+
+            for i in range(m):
+                for c in range(C):
+                    for h in range(H):
+                        h_start = h * self.stride
+                        h_end = h_start + self.kernel_size
+                        for w in range(W):
+                            w_start = w * self.stride
+                            w_end = w_start + self.kernel_size
+                            # Gradient of the inputs
+                            avg = out.grad[i, c, h, w] / (self.kernel_size ** 2)
+                            avg *= Tensor.ones((self.kernel_size, self.kernel_size))
+                            x.grad[i, c, h_start:h_end, w_start:w_end] += avg
         out._backward = _backward
 
         return out
