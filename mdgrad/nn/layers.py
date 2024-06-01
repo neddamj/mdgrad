@@ -79,13 +79,15 @@ class Conv2D(Module):
 
     def forward(self, x):
         x = x if isinstance(x, Tensor) else Tensor(x)
-        m, n_C_prev, n_H_prev, n_W_prev = x.shape
-        assert self.in_channels == n_C_prev, f'input has {n_C_prev} channels. layer expects {self.in_channels} channels'
+        if len(x.shape) == 3:
+            x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
+        m, n_C, n_H, n_W = x.shape
+        assert self.in_channels == n_C, f'input has {n_C} channels. layer expects {self.in_channels} channels'
 
         # Create a zero array in the shape of the output of the layer
         C = self.out_channels
-        H = int((n_H_prev + 2 * self.padding - self.kernel_size) / self.stride + 1)
-        W = int((n_W_prev + 2 * self.padding - self.kernel_size) / self.stride + 1)
+        H = int((n_H + 2 * self.padding - self.kernel_size) / self.stride + 1)
+        W = int((n_W + 2 * self.padding - self.kernel_size) / self.stride + 1)
         out = Tensor.zeros((m, C, H, W))
         # Do convolution
         for i in range(m):
@@ -138,6 +140,8 @@ class AvgPool2D(Module):
 
     def forward(self, x):
         x = x if isinstance(x, Tensor) else Tensor(x)
+        if len(x.shape) == 3:
+            x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
         m, n_C, n_H, n_W = x.shape
 
         C = n_C
@@ -159,7 +163,6 @@ class AvgPool2D(Module):
         def _backward():
             nonlocal x
             m, C, H, W = out.shape
-
             for i in range(m):
                 for c in range(C):
                     for h in range(H):
