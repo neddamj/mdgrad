@@ -65,6 +65,18 @@ class Linear(Module):
         else:
             return [self.w]
 
+class Flatten(Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        m, C, H, W = x.shape
+        return x.reshape(m, C*H*W)
+    
+    def parameters(self):
+        return []
+
 class Conv2D(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
         super().__init__()
