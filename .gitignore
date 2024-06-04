@@ -6,3 +6,4 @@ build
 dist
 madnet.egg-info
 .DS_Store
+test_mnist.ipynb
