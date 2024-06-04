@@ -20,9 +20,9 @@ class Module:
         return list(set(params))
     
 class Sequential(Module):
-    def __init__(self, layers=[]):
+    def __init__(self, *layers):
         super().__init__()
-        assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
+        #assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
         self.layers = layers
 
     def forward(self, x):
@@ -78,7 +78,7 @@ class Flatten(Module):
     def parameters(self):
         return []
     
-class Conv2D(Module):
+class Conv2d(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
         # https://hackmd.io/@machine-learning/blog-post-cnnumpy-fast#I-Forward-propagation
         super().__init__()
@@ -135,7 +135,7 @@ class Conv2D(Module):
     def parameters(self):
         return [self.w, self.b]
     
-class AvgPool2D(Module):
+class AvgPool2d(Module):
     def __init__(self, kernel_size, stride=1, padding=0):
         super().__init__()
         self.kernel_size = kernel_size
@@ -178,7 +178,7 @@ class AvgPool2D(Module):
     def parameters(self):
         return []
 
-class Conv2DNaive(Module):
+class Conv2dNaive(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
         super().__init__()
         self.in_channels = in_channels
@@ -246,7 +246,7 @@ class Conv2DNaive(Module):
         return [self.w, self.b]
     
 
-class AvgPool2DNaive(Module):
+class AvgPool2dNaive(Module):
     def __init__(self, kernel_size, stride=None):
         super().__init__()
         self.kernel_size = kernel_size
