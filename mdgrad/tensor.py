@@ -294,14 +294,25 @@ class Tensor:
     def __setitem__(self, key, value):
         self.data[key] = value
 
-def sum(x, axis=None, keepdims=True):
+def sum(x, axis=None, keepdims=np._NoValue):
     x = x if isinstance(x, Tensor) else Tensor(x)
     return x.sum(axis=axis, keepdims=keepdims)
 
-def mean(x, axis=None, keepdims=False):
+def mean(x, axis=None, keepdims=np._NoValue):
     x = x if isinstance(x, Tensor) else Tensor(x)
     out = x.sum(axis=axis, keepdims=keepdims) 
     return out * math.prod(out.shape) / math.prod(x.shape)
+
+def var(x, axis=None, keepdims=np._NoValue):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    mean_val = mean(x, axis=axis, keepdims=keepdims)
+    out = mean((x - mean_val)**2, axis=0, keepdims=True)
+    return out
+
+def std(x, axis=None, keepdims=np._NoValue):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    out = var(x, axis=axis, keepdims=keepdims) ** 0.5
+    return out
 
 def exp(x):
     x = x if isinstance(x, Tensor) else Tensor(x)
