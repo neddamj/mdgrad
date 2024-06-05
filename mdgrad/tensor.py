@@ -306,7 +306,7 @@ def mean(x, axis=None, keepdims=np._NoValue):
 def var(x, axis=None, keepdims=np._NoValue):
     x = x if isinstance(x, Tensor) else Tensor(x)
     mean_val = mean(x, axis=axis, keepdims=keepdims)
-    out = mean((x - mean_val)**2, axis=0, keepdims=True)
+    out = mean((x - mean_val)**2, axis=axis, keepdims=keepdims)
     return out
 
 def std(x, axis=None, keepdims=np._NoValue):
