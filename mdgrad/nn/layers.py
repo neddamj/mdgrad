@@ -16,12 +16,12 @@ class Module:
     def train(self):
         for key, value in self.__dict__.items():
             if isinstance(value, Module):
-                self.training = True
+                value.training = True
     
     def eval(self):
         for key, value in self.__dict__.items():
             if isinstance(value, Module):
-                self.training = False
+                value.training = False
 
     def parameters(self):
         params = []
@@ -60,6 +60,7 @@ class Sequential(Module):
     
 class Linear(Module):
     def __init__(self, in_features, out_features, bias=True):
+        super().__init__()
         self.bias = bias
         self.w = Tensor.randn(in_features, out_features) / np.sqrt(in_features)
         self.b = Tensor.zeros((1, out_features)) if self.bias else None
