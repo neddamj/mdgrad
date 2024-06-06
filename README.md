@@ -38,7 +38,7 @@ import mdgrad
 import mdgrad.nn as nn
 
 # Define the model and loss function
-model = nn.Sequential([
+model = nn.Sequential(
     nn.Linear(2, 20),
     nn.ReLU(),
     nn.Linear(20, 50), 
@@ -47,7 +47,7 @@ model = nn.Sequential([
     nn.ReLU(),
     nn.Linear(15, 1),
     nn.Sigmoid()
-])
+)
 loss_fn = nn.MSELoss()
 
 # Create dummy data
