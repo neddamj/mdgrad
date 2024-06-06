@@ -1,14 +1,27 @@
-from mdgrad.tensor import Tensor, mean, max
+from mdgrad.tensor import Tensor, mean, std, ones, zeros
 from .utils import im2col, col2im
 import numpy as np
 
 class Module:
+    def __init__(self) -> None:
+        self.training = False
+
     def __call__(self, *args, **kwargs):
         out = self.forward(*args, **kwargs)
         return out
     
     def forward(self, x):
         raise NotImplementedError
+    
+    def train(self):
+        for key, value in self.__dict__.items():
+            if isinstance(value, Module):
+                self.training = True
+    
+    def eval(self):
+        for key, value in self.__dict__.items():
+            if isinstance(value, Module):
+                self.training = False
 
     def parameters(self):
         params = []
@@ -22,13 +35,22 @@ class Module:
 class Sequential(Module):
     def __init__(self, *layers):
         super().__init__()
-        #assert isinstance(layers, (list, tuple)), 'input must be a list or tuple'
         self.layers = layers
 
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
         return x
+    
+    def train(self):
+        self.training = True
+        for layer in self.layers:
+            layer.training = True
+    
+    def eval(self):
+        self.training = False
+        for layer in self.layers:
+            layer.training = False
     
     def parameters(self):
         params = []
@@ -95,9 +117,9 @@ class Conv2d(Module):
         x = x if isinstance(x, Tensor) else Tensor(x)
         if len(x.shape) == 3:
             x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
+
         m, n_C, n_H, n_W = x.shape
         assert self.in_channels == n_C, f'input has {n_C} channels. layer expects {self.in_channels} channels'
-
         C = self.out_channels
         H = int((n_H + 2 * self.padding - self.kernel_size)/ self.stride) + 1
         W = int((n_W + 2 * self.padding - self.kernel_size)/ self.stride) + 1
@@ -194,9 +216,9 @@ class Conv2dNaive(Module):
         x = x if isinstance(x, Tensor) else Tensor(x)
         if len(x.shape) == 3:
             x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
+
         m, n_C, n_H, n_W = x.shape
         assert self.in_channels == n_C, f'input has {n_C} channels. layer expects {self.in_channels} channels'
-
         # Create a zero array in the shape of the output of the layer
         C = self.out_channels
         H = int((n_H + 2 * self.padding - self.kernel_size) / self.stride + 1)
@@ -256,8 +278,8 @@ class AvgPool2dNaive(Module):
         x = x if isinstance(x, Tensor) else Tensor(x)
         if len(x.shape) == 3:
             x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
-        m, n_C, n_H, n_W = x.shape
 
+        m, n_C, n_H, n_W = x.shape
         C = n_C
         H = int((n_H - self.kernel_size) / self.stride) + 1
         W = int((n_W - self.kernel_size) / self.stride) + 1
