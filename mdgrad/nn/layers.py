@@ -1,4 +1,4 @@
-from mdgrad.tensor import Tensor, mean, std, ones, zeros
+from mdgrad.tensor import Tensor, mean, var, ones, zeros
 from .utils import im2col, col2im
 import numpy as np
 
@@ -318,3 +318,46 @@ class AvgPool2dNaive(Module):
     
     def parameters(self):
         return []
+    
+class BatchNorm2d(Module):
+    def __init__(self, num_features, eps=1e-5, momentum=0.1):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.gain = ones((1, self.num_features, 1, 1))
+        self.bias = zeros((1, self.num_features, 1, 1))
+        self.running_mean = zeros((1, self.num_features, 1, 1))
+        self.running_var = ones((1, self.num_features, 1, 1))
+
+
+    def forward(self, x):
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        if len(x.shape) == 3:
+            x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
+        m, n_C, n_H, n_W = x.shape
+
+        if self.training:
+            bn_mean = mean(x, axis=(0, 2, 3), keepdims=True)
+            bn_var = var(x, axis=(0, 2, 3), keepdims=True) + self.eps
+            self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * bn_mean
+            self.running_var= (1 - self.momentum) * self.running_var + self.momentum * bn_var
+        else:
+            bn_mean = self.running_mean
+            bn_var = self.running_var
+        norm = ((x - bn_mean) / bn_var)
+        out = self.gain * norm + self.bias
+        out._prev = set((x,))
+
+        def _backward():
+            # Gradient of input
+            x.grad += (self.gain * (bn_var + 1e-9) ** 0.5 / m) * (m * out.grad - out.grad.sum((0, 2, 3), keepdims=True) - m/(m-1) * norm*(out.grad*norm).sum((0, 2, 3), keepdims=True))
+            # Gradients of parameters
+            self.gain.grad += (norm * out.grad).sum((0, 2, 3), keepdims=True)
+            self.bias.grad += out.grad.sum((0, 2, 3), keepdims=True)
+        out._backward = _backward
+
+        return out
+
+    def parameters(self):
+        return [self.gain, self.bias]
