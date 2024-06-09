@@ -330,7 +330,6 @@ class BatchNorm2d(Module):
         self.running_mean = zeros((1, self.num_features, 1, 1))
         self.running_var = ones((1, self.num_features, 1, 1))
 
-
     def forward(self, x):
         x = x if isinstance(x, Tensor) else Tensor(x)
         if len(x.shape) == 3:
@@ -345,13 +344,13 @@ class BatchNorm2d(Module):
         else:
             bn_mean = self.running_mean
             bn_var = self.running_var
-        norm = ((x - bn_mean) / bn_var)
+        norm = ((x - bn_mean) / (bn_var ** 0.5))
         out = self.gain * norm + self.bias
         out._prev = set((x,))
 
         def _backward():
             # Gradient of input
-            x.grad += (self.gain * (bn_var + 1e-9) ** 0.5 / m) * (m * out.grad - out.grad.sum((0, 2, 3), keepdims=True) - m/(m-1) * norm*(out.grad*norm).sum((0, 2, 3), keepdims=True))
+            x.grad += (self.gain * (bn_var + self.eps) ** 0.5 / m) * (m * out.grad - out.grad.sum((0, 2, 3), keepdims=True) - m/(m-1) * norm*(out.grad*norm).sum((0, 2, 3), keepdims=True))
             # Gradients of parameters
             self.gain.grad += (norm * out.grad).sum((0, 2, 3), keepdims=True)
             self.bias.grad += out.grad.sum((0, 2, 3), keepdims=True)
