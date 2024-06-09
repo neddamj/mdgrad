@@ -338,13 +338,13 @@ class BatchNorm2d(Module):
 
         if self.training:
             bn_mean = mean(x, axis=(0, 2, 3), keepdims=True)
-            bn_var = var(x, axis=(0, 2, 3), keepdims=True) + self.eps
+            bn_var = var(x, axis=(0, 2, 3), keepdims=True)
             self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * bn_mean
             self.running_var= (1 - self.momentum) * self.running_var + self.momentum * bn_var
         else:
             bn_mean = self.running_mean
             bn_var = self.running_var
-        norm = ((x - bn_mean) / (bn_var ** 0.5))
+        norm = ((x - bn_mean) / ((bn_var + self.eps) ** 0.5))
         out = self.gain * norm + self.bias
         out._prev = set((x,))
 
