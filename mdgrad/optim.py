@@ -72,12 +72,12 @@ class Adam(Optimizer):
             p.data -= self.lr * m_hat / ((v_hat ** 2) + self.eps)
 
 class RMSProp(Optimizer):
-    def __init__(self, parameters, lr=0.01, alpha=0.99, eps=1e-8, gamma=0, mu=0, maximize=False):
+    def __init__(self, parameters, lr=0.01, alpha=0.99, eps=1e-8, weight_decay=0, momentum=0, maximize=False):
         super().__init__(parameters, lr)
         self.alpha = alpha
-        self.gamma = gamma
+        self.weight_decay = weight_decay
         self.eps = eps
-        self.mu = mu
+        self.momentum = momentum
         self.t = 0
         self.maximize = maximize
         self.v = [np.zeros_like(p.data) for p in parameters]
@@ -90,12 +90,43 @@ class RMSProp(Optimizer):
             grad = p.grad
             if self.maximize:
                 grad *= -1
-            if self.gamma != 0:
-                p.grad += self.gamma * p.data
+            if self.weight_decay != 0:
+                p.grad += self.weight_decay * p.data
             self.v[i] = self.alpha * self.v[i] + (1 - self.alpha) * (grad ** 2)
             v_hat = self.v[i]
-            if self.mu > 0:
-                self.b[i] = self.mu * self.b[i] + grad / ((v_hat ** 2) + self.eps)
+            if self.momentum > 0:
+                self.b[i] = self.momentum * self.b[i] + grad / ((v_hat ** 2) + self.eps)
                 p.data -= self.lr * self.b[i]
             else:
                 p.data -= self.lr * grad / ((v_hat ** 2) + self.eps)
+
+class AdamW(Optimizer):
+    def __init__(self, parameters, lr=0.001, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01, maximize=False):
+        super().__init__(parameters, lr)
+        self.beta1 = betas[0]
+        self.beta2 = betas[1]
+        self.t = 0
+        self.eps = eps
+        self.maximize = maximize
+        self.weight_decay = weight_decay
+        self.m = [np.zeros_like(p.data) for p in self.parameters]
+        self.v = [np.zeros_like(p.data) for p in self.parameters]
+
+    def step(self):
+        # https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html
+        self.t += 1
+        for i, p in enumerate(self.parameters):
+            grad = p.grad
+            if self.maximize:
+                grad *= -1
+            p.data -= self.lr * self.weight_decay * p.data
+            # Update biased first moment estimate
+            self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * grad
+            # Update biased second raw moment estimate
+            self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * (grad ** 2)
+            # Compute bias-corrected first moment estimate
+            m_hat = self.m[i] / (1 - (self.beta1 ** self.t))
+            # Compute bias corrected second raw moment estimate
+            v_hat = self.v[i] / (1 - (self.beta2 ** self.t))
+            # Update parameters
+            p.data -= self.lr * m_hat / ((v_hat ** 2) + self.eps)
