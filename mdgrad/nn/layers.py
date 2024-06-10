@@ -360,3 +360,13 @@ class BatchNorm2d(Module):
 
     def parameters(self):
         return [self.gain, self.bias]
+
+class Dropout(Module):
+    def __init__(self, p=0.5):
+        super().__init__()
+        self.p = p
+        self.scale = 1 / (1 - self.p) 
+
+    def forward(self, x):
+        mask = np.random.uniform(low=0., high=1., size=x.shape) > self.p
+        return x * mask
