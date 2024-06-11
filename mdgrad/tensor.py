@@ -228,6 +228,13 @@ class Tensor:
     
     def numpy(self):
         return self.data.copy()
+    
+    def tolist(self):
+        return self.data.copy().tolist()
+    
+    def item(self):
+        assert self.data.size == 1, f'The data has {self.data.size} elements when it should only have 1'
+        return self.data.copy().item()
         
     @classmethod
     def zeros(cls, shape):
