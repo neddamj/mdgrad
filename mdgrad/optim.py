@@ -69,7 +69,7 @@ class Adam(Optimizer):
             # Compute bias corrected second raw moment estimate
             v_hat = self.v[i] / (1 - (self.beta2 ** self.t))
             # Update parameters
-            p.data -= self.lr * m_hat / ((v_hat ** 2) + self.eps)
+            p.data -= self.lr * m_hat / (v_hat ** 0.5 + self.eps)
 
 class RMSProp(Optimizer):
     def __init__(self, parameters, lr=0.01, alpha=0.99, eps=1e-8, weight_decay=0, momentum=0, maximize=False):
@@ -129,4 +129,4 @@ class AdamW(Optimizer):
             # Compute bias corrected second raw moment estimate
             v_hat = self.v[i] / (1 - (self.beta2 ** self.t))
             # Update parameters
-            p.data -= self.lr * m_hat / ((v_hat ** 2) + self.eps)
+            p.data -= self.lr * m_hat / ((v_hat ** 0.5) + self.eps)
