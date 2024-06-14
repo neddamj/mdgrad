@@ -368,5 +368,9 @@ class Dropout(Module):
         self.scale = 1 / (1 - self.p) 
 
     def forward(self, x):
-        mask = np.random.uniform(low=0., high=1., size=x.shape) > self.p
-        return x * mask
+        if self.training:
+            mask = np.random.uniform(low=0., high=1., size=x.shape) > self.p
+            out = x * mask
+        else:
+            out = x
+        return out
