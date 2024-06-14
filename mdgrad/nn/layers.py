@@ -1,4 +1,4 @@
-from mdgrad.tensor import Tensor, mean, var, ones, zeros
+from mdgrad.tensor import Tensor, mean, var, ones, zeros, randn
 from .utils import im2col, col2im
 import numpy as np
 
@@ -62,15 +62,15 @@ class Linear(Module):
     def __init__(self, in_features, out_features, bias=True):
         super().__init__()
         self.bias = bias
-        self.w = Tensor.randn(in_features, out_features) / np.sqrt(in_features)
-        self.b = Tensor.zeros((1, out_features)) if self.bias else None
+        self.w = randn(in_features, out_features, requires_grad=True) / np.sqrt(in_features)
+        self.b = zeros((1, out_features), requires_grad=True) if self.bias else None
 
     def forward(self, x):
-        x = x if isinstance(x, Tensor) else Tensor(x)
+        x = x if isinstance(x, Tensor) else Tensor(x); x.requires_grad = True
         
         out = x @ self.w + self.b if self.bias else x @ self.w
         # Add previous tensors to computation graph
-        out._prev = set((x,))
+        out._prev = set((x,)); out.requires_grad = True
 
         def _backward():
             # Gradients of parameters
@@ -111,11 +111,11 @@ class Conv2d(Module):
         self.stride = stride
         self.padding = padding
 
-        self.w = Tensor.randn(self.out_channels, self.in_channels, self.kernel_size, self.kernel_size) / np.sqrt(self.kernel_size)
-        self.b = Tensor.zeros(self.out_channels)
+        self.w = randn(self.out_channels, self.in_channels, self.kernel_size, self.kernel_size, requires_grad=True) / np.sqrt(self.kernel_size)
+        self.b = zeros((self.out_channels), requires_grad=True)
 
     def forward(self, x):
-        x = x if isinstance(x, Tensor) else Tensor(x)
+        x = x if isinstance(x, Tensor) else Tensor(x); x.requires_grad = True
         if len(x.shape) == 3:
             x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
 
@@ -130,8 +130,7 @@ class Conv2d(Module):
         # Perform matrix multiplication.
         out = w_col @ X_col + b_col
         # Reshape back matrix to image.
-        out = Tensor(np.array(np.hsplit(out, m)).reshape((m, C, H, W)), (x,))
-        #self.cache = X, X_col, w_col
+        out = Tensor(np.array(np.hsplit(out, m)).reshape((m, C, H, W)), (x,), requires_grad=True)
 
         def _backward():
             #X, X_col, w_col = self.cache
@@ -167,6 +166,7 @@ class AvgPool2d(Module):
     
     def forward(self, x):
         # https://hackmd.io/@machine-learning/blog-post-cnnumpy-fast#I-Forward-propagation
+        x = x if isinstance(x, Tensor) else Tensor(x); x.requires_grad = True
         m, n_C, n_H, n_W = x.shape
         C = n_C
         H = int((n_H + 2 * self.padding - self.kernel_size)/ self.stride) + 1
@@ -177,7 +177,7 @@ class AvgPool2d(Module):
         # Reshape A_pool properly.
         A_pool = np.array(np.hsplit(A_pool, m))
         A_pool = A_pool.reshape(m, C, H, W)
-        out = Tensor(A_pool, ((x,)))
+        out = Tensor(A_pool, (x,), requires_grad=True)
 
         def _backward():
             #X = self.cache
@@ -325,13 +325,13 @@ class BatchNorm2d(Module):
         self.num_features = num_features
         self.eps = eps
         self.momentum = momentum
-        self.gain = ones((1, self.num_features, 1, 1))
-        self.bias = zeros((1, self.num_features, 1, 1))
+        self.gain = ones((1, self.num_features, 1, 1), requires_grad=True)
+        self.bias = zeros((1, self.num_features, 1, 1), requires_grad=True)
         self.running_mean = zeros((1, self.num_features, 1, 1))
         self.running_var = ones((1, self.num_features, 1, 1))
 
     def forward(self, x):
-        x = x if isinstance(x, Tensor) else Tensor(x)
+        x = x if isinstance(x, Tensor) else Tensor(x); x.requires_grad = True
         if len(x.shape) == 3:
             x = Tensor(np.expand_dims(x.data, axis=0), x._prev)
         m, n_C, n_H, n_W = x.shape
@@ -346,7 +346,7 @@ class BatchNorm2d(Module):
             bn_var = self.running_var
         norm = ((x - bn_mean) / ((bn_var + self.eps) ** 0.5))
         out = self.gain * norm + self.bias
-        out._prev = set((x,))
+        out._prev = set((x,)); out.requires_grad = True
 
         def _backward():
             # Gradient of input
