@@ -223,6 +223,9 @@ class Tensor:
         self.grad = np.ones_like(self.data)
         for v in reversed(topo):
             v._backward() 
+
+    def abs(self):
+        return Tensor(np.abs(self.data))
     
     def max(self, axis=None):
         return np.max(self.data, axis=axis)
@@ -275,6 +278,10 @@ class Tensor:
     @classmethod
     def eye(cls, N, M=None):
         return cls(np.eye(N, M))
+    
+    @classmethod
+    def arange(cls, start=0, end=10, step=1, requires_grad=False):
+        return cls(np.arange(start=start, stop=end, step=step), requires_grad=requires_grad)
 
     def __neg__(self):
         return self * -1
@@ -317,6 +324,13 @@ class Tensor:
     
     def __setitem__(self, key, value):
         self.data[key] = value
+
+def abs(x):
+    x = x if isinstance(x, Tensor) else Tensor(x)
+    return x.abs()
+
+def arange(start=0, end=10, step=1):
+    return Tensor.arange(start=start, end=end, step=step)
 
 def sum(x, axis=None, keepdims=np._NoValue):
     x = x if isinstance(x, Tensor) else Tensor(x)
