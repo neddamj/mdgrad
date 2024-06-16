@@ -247,11 +247,21 @@ class Tensor:
     def zeros(cls, shape, requires_grad=False):
         assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
         return cls(np.zeros(shape), requires_grad=requires_grad)
+    
+    @classmethod
+    def zeros_like(cls, input, requires_grad=False):
+        input_shape = input.shape
+        return zeros(input_shape, requires_grad=requires_grad)
 
     @classmethod
     def ones(cls, shape, requires_grad=False):
         assert isinstance(shape, int) or isinstance(shape, tuple), f'shape should be int or tuple insted of {type(shape)}'
         return cls(np.ones(shape), requires_grad=requires_grad)
+    
+    @classmethod
+    def ones_like(cls, input, requires_grad=False):
+        input_shape = input.shape
+        return ones(input_shape, requires_grad=requires_grad)
     
     @classmethod
     def normal(cls, mean=0.0, std=1.0, shape=None, requires_grad=False):
@@ -367,8 +377,14 @@ def transpose(x, axes=None):
 def ones(shape, requires_grad=False):
     return Tensor.ones(shape=shape, requires_grad=requires_grad)
 
+def ones_like(input, requires_grad=False):
+    return Tensor.ones_like(input, requires_grad=requires_grad)
+
 def zeros(shape, requires_grad=False):
     return Tensor.zeros(shape=shape, requires_grad=requires_grad)
+
+def zeros_like(input, requires_grad=False):
+    return Tensor.zeros_like(input, requires_grad=requires_grad)
 
 def eye(N, M=None):
     return Tensor.eye(N=N, M=M)
