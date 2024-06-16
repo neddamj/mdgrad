@@ -4,17 +4,16 @@ import math
 class Tensor:
     def __init__(self, data, _children=(), requires_grad=False):
         self.data = data if isinstance(data, np.ndarray) else np.array(data)
-        self.grad = None #np.zeros_like(self.data)
-        # Set data to floats to division can be done
         self.data = self.data.astype(np.float32) 
-        #self.grad = self.grad.astype(np.float32)
         self.requires_grad = requires_grad
         self._prev = set(_children)
+        self.grad = None
+        self._backward = lambda: None
+
         self.shape = self.data.shape
         self.size = self.data.size
         self.dtype = self.data.dtype
-        self._backward = lambda: None
-    
+        
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other, requires_grad=True)
         out = Tensor(self.data + other.data, (self, other), requires_grad=True)
@@ -240,6 +239,9 @@ class Tensor:
     def item(self):
         assert self.data.size == 1, f'The data has {self.data.size} elements when it should only have 1'
         return self.data.copy().item()
+    
+    def clone(self, requires_grad=False):
+        return Tensor(self.data.copy(), requires_grad=requires_grad)
         
     @classmethod
     def zeros(cls, shape, requires_grad=False):
