@@ -276,6 +276,11 @@ class Tensor:
         return cls(np.random.randn(*args), requires_grad=requires_grad)
     
     @classmethod
+    def randn_like(cls, input, requires_grad=False):
+        input_shape = input.shape
+        return cls.normal(shape=input_shape, requires_grad=requires_grad)
+    
+    @classmethod
     def eye(cls, N, M=None):
         return cls(np.eye(N, M))
     
@@ -405,6 +410,9 @@ def eye(N, M=None):
 
 def randn(*shape, requires_grad=False):
     return Tensor.randn(*shape, requires_grad=requires_grad)
+
+def randn_like(input, requires_grad=False):
+    return Tensor.randn_like(input, requires_grad=requires_grad)
 
 def tensor(data, requires_grad=False):
     return Tensor(data, requires_grad=requires_grad)
