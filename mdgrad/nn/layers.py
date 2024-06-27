@@ -95,6 +95,7 @@ class Flatten(Module):
 
     def forward(self, x):
         x = x if isinstance(x, Tensor) else Tensor(x)
+        assert x.data.ndim == 4, f'inputs should be of shape (n, c, h, w) but have shape {x.shape}'
         m, C, H, W = x.shape
         return x.reshape(m, C*H*W)
     
