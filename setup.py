@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 # Setting up
 setup(
     name="mdgrad",
-    version='0.2.1',
+    version='0.3',
     author="Jordan Madden",
     author_email="<jordanmadden285@gmail.com>",
     description='Tensor-based autdiff engine and neural network API',
